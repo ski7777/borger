@@ -40,31 +40,32 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata (base)
-        id: meta-base
+      - name: Extract Docker metadata (volumes)
+        id: meta-volumes
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
             latest=false
-            suffix=-base,onlatest=true
+            suffix=-volumes,onlatest=true
           tags: |
             type=raw,value=latest,enable={{ is_default_branch }}
 
-      - name: Build and push Docker image (base)
-        id: build-and-push-base
+      - name: Build and push Docker image (volumes)
+        id: build-and-push-volumes
         uses: docker/build-push-action@v7
         with:
           context: .
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-base.outputs.tags }}
-          labels: ${{ steps.meta-base.outputs.labels }}
+          tags: ${{ steps.meta-volumes.outputs.tags }}
+          labels: ${{ steps.meta-volumes.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          target: volumes
 
-      - name: Sign the published Docker image (base)
+      - name: Sign the published Docker image (volumes)
         if: ${{ github.event_name != 'pull_request' }}
         env:
-          TAGS: ${{ steps.meta-base.outputs.tags }}
-          DIGEST: ${{ steps.build-and-push-base.outputs.digest }}
+          TAGS: ${{ steps.meta-volumes.outputs.tags }}
+          DIGEST: ${{ steps.build-and-push-volumes.outputs.digest }}
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
