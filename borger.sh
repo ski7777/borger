@@ -26,7 +26,7 @@ function run_backup_job_volumes(){
     local container_id=$1
     local mounts=$2
     local container_mounts_borg_prefix=$3
-    $(backup_job_cmd $container_id volumes) \
+    echo $(backup_job_cmd $container_id volumes) \
         --env $mounts \
         --env container_mounts_borg_prefix=$container_mounts_borg_prefix \
         $(backup_job_image volumes)
