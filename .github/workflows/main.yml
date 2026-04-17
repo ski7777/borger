@@ -61,6 +61,29 @@ jobs:
           cache-to: type=gha,mode=max
           target: borger
 
+      - name: Extract Docker metadata (base)
+        id: meta-base
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          flavor: |
+            latest=false
+            suffix=-base,onlatest=true
+          tags: |
+            type=raw,value=latest,enable={{ is_default_branch }}
+
+      - name: Build and push Docker image (base)
+        id: build-and-push-base
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: ${{ github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta-base.outputs.tags }}
+          labels: ${{ steps.meta-base.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          target: base
+
       - name: Extract Docker metadata (volumes)
         id: meta-volumes
         uses: docker/metadata-action@v6

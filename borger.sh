@@ -4,16 +4,12 @@ if [ -n "$BORGER_BREAK_LOCK" ]; then
 fi
 
 function backup_job_cmd() {
-    local container_id=$1
-    local image_flavour=$2
     echo docker run \
-        --volumes-from $container_id:ro \
         --mount type=bind,src=$BORGER_SSH_DIR,dst=/root/.ssh,ro \
         --mount type=bind,src=$BORGER_CACHE_DIR,dst=/root/.cache/borg \
         --mount type=bind,src=$BORGER_PASSPHRASE_FILE,dst=/root/borg-passphrase.txt,ro \
         --env BORG_REPO=$BORG_REPO \
         --env BORG_PASSCOMMAND=\"cat /root/borg-passphrase.txt\" \
-        --env mounts=$(echo $mounts| base64 -w 0) \
         --rm
 }
 
@@ -26,7 +22,8 @@ function run_backup_job_volumes(){
     local container_id=$1
     local mounts=$2
     local container_mounts_borg_prefix=$3
-    $(backup_job_cmd $container_id volumes) \
+    $(backup_job_cmd) \
+        --volumes-from $container_id:ro \
         --env mounts=$mounts \
         --env container_mounts_borg_prefix=$container_mounts_borg_prefix \
         $(backup_job_image volumes)
@@ -52,5 +49,5 @@ done
 
 # show borg info unless BORGER_SUPPRESS_INFO has any value
 if [ -z "$BORGER_SUPPRESS_INFO" ]; then
-    borg info
+    $(backup_job_cmd) $(backup_job_image base) borg info
 fi
