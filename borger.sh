@@ -12,7 +12,7 @@ function backup_job_cmd() {
         --mount type=bind,src=$BORGER_CACHE_DIR,dst=/root/.cache/borg \
         --mount type=bind,src=$BORGER_PASSPHRASE_FILE,dst=/root/borg-passphrase.txt,ro \
         --env BORG_REPO=$BORG_REPO \
-        --env BORG_PASSCOMMAND="cat /root/borg-passphrase.txt" \
+        --env BORG_PASSCOMMAND=\"cat /root/borg-passphrase.txt\" \
         --env mounts=$(echo $mounts| base64 -w 0) \
         --rm
 }
