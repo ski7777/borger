@@ -22,11 +22,13 @@ function run_backup_job_volumes(){
     local container_id=$1
     local mounts=$2
     local container_mounts_borg_prefix=$3
-    $(backup_job_cmd) \
+    local cmd=$(echo $(backup_job_cmd) \
         --volumes-from $container_id:ro \
         --env mounts=$mounts \
         --env container_mounts_borg_prefix=$container_mounts_borg_prefix \
-        $(backup_job_image volumes)
+        $(backup_job_image volumes) \
+    )
+    eval "$cmd"
 }
 
 container_ids=$(docker ps -a --filter "label=$BORGER_LABEL_NAMESPACE.enable" --format "{{.ID}}")
