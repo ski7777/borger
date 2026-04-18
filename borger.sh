@@ -43,6 +43,15 @@ for container_id in $container_ids; do
         container_mounts_borg_prefix=$container_borg_prefix/mounts
         run_backup_job_volumes $container_id $mounts $container_mounts_borg_prefix
     fi
+    
+    pg_dbs=$(docker inspect -f '{{index .Config.Labels "$BORGER_LABEL_NAMESPACE.postgres.databases"}}' "$container_id"| sed "s/,/ /g")
+    pg_dbs_borg_prefix=$container_borg_prefix/postgres
+    pg_user=$(docker exec -t "$container_id" bash -c 'echo "$POSTGRES_USER"')
+    for db in $pg_dbs; do
+        echo " - Postgres database $db"
+        echo $pg_dbs_borg_prefix/$db
+        docker exec -t $container_id pg_dump -c -U $pg_user $db | borg create ::$(echo $pg_dbs_borg_prefix/$db | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
+    done
 
     echo "---------------------------------------------"
 done
