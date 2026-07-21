@@ -49,7 +49,7 @@ for container_id in $container_ids; do
         # run_backup_job_volumes $container_id $mounts $container_mounts_borg_prefix
     fi
     
-    pg_dbs=$(docker inspect -f $(echo '{{index .Config.Labels "$BORGER_LABEL_NAMESPACE.postgres.databases"}}') $container_id | sed "s/,/ /g")
+    pg_dbs=$(docker inspect -f $(echo \'{{index .Config.Labels "$BORGER_LABEL_NAMESPACE.postgres.databases"}}\') $container_id | sed "s/,/ /g")
     echo $pg_dbs
     pg_dbs_borg_prefix=$container_borg_prefix/postgres
     pg_user=$(docker exec -t "$container_id" bash -c 'echo "$POSTGRES_USER"')
