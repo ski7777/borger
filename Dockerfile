@@ -1,19 +1,19 @@
 FROM docker:latest AS base
 RUN apk add --no-cache borgbackup openssh-client
 
-FROM base as base-jq
+FROM base AS base-jq
 RUN apk add --no-cache jq
 
-FROM base-jq as borger
+FROM base-jq AS borger
 ENV BORGER_LABEL_NAMESPACE="de.ski7777.borger"
 COPY borger.sh /borger.sh
 CMD ["/borger.sh"]
 
-FROM base-jq as volumes
+FROM base-jq AS volumes
 COPY volumes.sh /volumes.sh
 CMD ["/volumes.sh"]
 
-FROM base-jq as mailcow
+FROM base-jq AS mailcow
 RUN apk add --no-cache --upgrade sed findutils bash git openssl curl gawk coreutils grep
 COPY mailcow.sh /mailcow.sh
 CMD ["/mailcow.sh"]
