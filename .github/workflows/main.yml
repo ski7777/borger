@@ -113,33 +113,3 @@ jobs:
           TAGS: ${{ steps.meta-volumes.outputs.tags }}
           DIGEST: ${{ steps.build-and-push-volumes.outputs.digest }}
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
-    
-      - name: Extract Docker metadata (mailcow)
-        id: meta-mailcow
-        uses: docker/metadata-action@v6
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          flavor: |
-            latest=false
-            suffix=-mailcow,onlatest=true
-          tags: |
-            type=raw,value=latest,enable={{ is_default_branch }}
-
-      - name: Build and push Docker image (mailcow)
-        id: build-and-push-mailcow
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta-mailcow.outputs.tags }}
-          labels: ${{ steps.meta-mailcow.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          target: mailcow
-
-      - name: Sign the published Docker image (mailcow)
-        if: ${{ github.event_name != 'pull_request' }}
-        env:
-          TAGS: ${{ steps.meta-mailcow.outputs.tags }}
-          DIGEST: ${{ steps.build-and-push-mailcow.outputs.digest }}
-        run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}

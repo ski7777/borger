@@ -31,6 +31,25 @@ function run_backup_job_volumes(){
     eval "$cmd"
 }
 
+function run_backup_job_mailcow(){
+    local compose_id=$1
+    local mounts=$(
+        cat <<'EOF' | base64 -w0
+    [
+        { "Source": "vmail", "Destination": "/mounts/vmail" }
+    ]
+EOF
+    )
+    local cmd=$(echo $(backup_job_cmd) \
+        --volume $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=vmail-vol-1"):/mounts/vmail:ro \
+        --env mounts=$mounts \
+        --env container_mounts_borg_prefix=$container_mounts_borg_prefix \
+        $(backup_job_image volumes) \
+    )
+    echo $cmd
+    eval "$cmd"
+}
+
 container_ids=$(docker ps -a --filter "label=$BORGER_LABEL_NAMESPACE.enable" --format "{{.ID}}")
 echo $container_ids
 for container_id in $container_ids; do
@@ -59,6 +78,8 @@ for container_id in $container_ids; do
 
     echo "---------------------------------------------"
 done
+
+run_backup_job_mailcow maicowdockerized
 
 # show borg info unless BORGER_SUPPRESS_INFO has any value
 if [ -z "$BORGER_SUPPRESS_INFO" ]; then
