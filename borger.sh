@@ -57,12 +57,12 @@ EOF
     )
     eval "$cmd"
     
-    docker exec --env backup_db=$db $(docker container ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.service=mysql-mailcow") sh -c 'mariadb-dump -p"${MYSQL_ROOT_PASSWORD:-$MARIADB_ROOT_PASSWORD}" --single-transaction $backup_db' | borg create ::$(echo mailcow/$compose_id/mariadb | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
+    echo "- database
+    docker exec --env backup_db=$db $(docker container ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.service=mysql-mailcow") sh -c 'mariadb-dump -p"${MYSQL_ROOT_PASSWORD:-$MARIADB_ROOT_PASSWORD}" --single-transaction mailcow' | borg create ::$(echo mailcow/$compose_id/mariadb | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
 }
 
 container_ids=$(docker ps -a --filter "label=$BORGER_LABEL_NAMESPACE.enable" --format "{{.ID}}")
 for container_id in $container_ids; do
-    echo $container_id
     container_name=$(docker inspect -f '{{.Name}}' "$container_id" | sed 's/^\///')
     container_borg_prefix=/container/$container_name
     echo "Backing-up container: $container_name ($container_id)"
@@ -92,7 +92,7 @@ for container_id in $container_ids; do
         echo $mariadb_dbs_borg_prefix/$db
         docker exec --env backup_db=$db $container_id sh -c 'mariadb-dump -p"${MYSQL_ROOT_PASSWORD:-$MARIADB_ROOT_PASSWORD}" --single-transaction $backup_db' | borg create ::$(echo $mariadb_dbs_borg_prefix/$db | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
     done
-    
+
     echo "---------------------------------------------"
 done
 
