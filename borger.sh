@@ -60,6 +60,8 @@ EOF
     
     echo " - database"
     docker exec --env backup_db=$db $(docker container ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.service=mysql-mailcow") sh -c 'mariadb-dump -p"${MYSQL_ROOT_PASSWORD:-$MARIADB_ROOT_PASSWORD}" --single-transaction mailcow' | borg create ::$(echo mailcow/$compose_id/mariadb | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
+
+    echo "---------------------------------------------"
 }
 
 container_ids=$(docker ps -a --filter "label=$BORGER_LABEL_NAMESPACE.enable" --format "{{.ID}}")
@@ -82,7 +84,6 @@ for container_id in $container_ids; do
     pg_user=$(docker exec -t "$container_id" bash -c 'echo "$POSTGRES_USER"')
     for db in $pg_dbs; do
         echo " - Postgres database $db"
-        echo $pg_dbs_borg_prefix/$db
         docker exec -t $container_id pg_dump -c -U $pg_user $db | borg create ::$(echo $pg_dbs_borg_prefix/$db | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
     done
 
@@ -90,7 +91,6 @@ for container_id in $container_ids; do
     mariadb_dbs_borg_prefix=$container_borg_prefix/mariadb
     for db in $mariadb_dbs; do
         echo " - MariadDB database $db"
-        echo $mariadb_dbs_borg_prefix/$db
         docker exec --env backup_db=$db $container_id sh -c 'mariadb-dump -p"${MYSQL_ROOT_PASSWORD:-$MARIADB_ROOT_PASSWORD}" --single-transaction $backup_db' | borg create ::$(echo $mariadb_dbs_borg_prefix/$db | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
     done
 
