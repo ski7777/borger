@@ -36,12 +36,20 @@ function run_backup_job_mailcow(){
     local mounts=$(
         cat <<'EOF' | base64 -w0
     [
-        { "Source": "vmail", "Destination": "/mounts/vmail" }
+        { "Source": "vmail", "Destination": "/mounts/vmail" },
+        { "Source": "crypt", "Destination": "/mounts/crypt" },
+        { "Source": "redis", "Destination": "/mounts/redis" },
+        { "Source": "rspamd", "Destination": "/mounts/rspamd" },
+        { "Source": "postfix", "Destination": "/mounts/postfix" },
     ]
 EOF
     )
     local cmd=$(echo $(backup_job_cmd) \
         --volume $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=vmail-vol-1"):/mounts/vmail:ro \
+        --volume $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=crypt-vol-1"):/mounts/crypt:ro \
+        --volume $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=redis-vol-1"):/mounts/redis:ro \
+        --volume $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=rspamd-vol-1"):/mounts/rspamd:ro \
+        --volume $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=postfix-vol-1"):/mounts/postfix:ro \
         --env mounts=$mounts \
         --env container_mounts_borg_prefix=$container_mounts_borg_prefix \
         $(backup_job_image volumes) \
