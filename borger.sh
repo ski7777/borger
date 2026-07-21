@@ -40,7 +40,7 @@ function run_backup_job_mailcow(){
         { "Source": "crypt", "Destination": "/mounts/crypt" },
         { "Source": "redis", "Destination": "/mounts/redis" },
         { "Source": "rspamd", "Destination": "/mounts/rspamd" },
-        { "Source": "postfix", "Destination": "/mounts/postfix" },
+        { "Source": "postfix", "Destination": "/mounts/postfix" }
     ]
 EOF
     )
