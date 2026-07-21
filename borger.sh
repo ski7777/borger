@@ -91,6 +91,8 @@ for container_id in $container_ids; do
         echo " - MariadDB database $db"
         echo $mariadb_dbs_borg_prefix/$db
         docker exec --env backup_db=$db $container_id sh -c 'mariadb-dump -p"${MYSQL_ROOT_PASSWORD:-$MARIADB_ROOT_PASSWORD}" --single-transaction $backup_db' | borg create ::$(echo $mariadb_dbs_borg_prefix/$db | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
+    done
+    
     echo "---------------------------------------------"
 done
 
