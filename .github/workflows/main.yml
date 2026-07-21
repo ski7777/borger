@@ -114,14 +114,14 @@ jobs:
           DIGEST: ${{ steps.build-and-push-volumes.outputs.digest }}
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
     
-      - name: Extract Docker metadata (volumes)
-        id: meta-volumes
+      - name: Extract Docker metadata (mailcow)
+        id: meta-mailcow
         uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
             latest=false
-            suffix=-volumes,onlatest=true
+            suffix=-mailcow,onlatest=true
           tags: |
             type=raw,value=latest,enable={{ is_default_branch }}
 
