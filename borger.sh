@@ -64,5 +64,5 @@ done
 
 # show borg info unless BORGER_SUPPRESS_INFO has any value
 if [ -z "$BORGER_SUPPRESS_INFO" ]; then
-    $(backup_job_cmd) $(backup_job_image base) borg info
+    borg info
 fi
