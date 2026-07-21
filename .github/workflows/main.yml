@@ -114,7 +114,7 @@ jobs:
           DIGEST: ${{ steps.build-and-push-volumes.outputs.digest }}
         run: echo "${TAGS}" | xargs -I {} cosign sign --yes {}@${DIGEST}
     
-    - name: Extract Docker metadata (volumes)
+      - name: Extract Docker metadata (volumes)
         id: meta-volumes
         uses: docker/metadata-action@v6
         with:
