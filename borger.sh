@@ -46,12 +46,10 @@ EOF
         --env container_mounts_borg_prefix=$container_mounts_borg_prefix \
         $(backup_job_image volumes) \
     )
-    echo $cmd
     eval "$cmd"
 }
 
 container_ids=$(docker ps -a --filter "label=$BORGER_LABEL_NAMESPACE.enable" --format "{{.ID}}")
-echo $container_ids
 for container_id in $container_ids; do
     echo $container_id
     container_name=$(docker inspect -f '{{.Name}}' "$container_id" | sed 's/^\///')
@@ -79,7 +77,7 @@ for container_id in $container_ids; do
     echo "---------------------------------------------"
 done
 
-run_backup_job_mailcow maicowdockerized
+run_backup_job_mailcow mailcowdockerized
 
 # show borg info unless BORGER_SUPPRESS_INFO has any value
 if [ -z "$BORGER_SUPPRESS_INFO" ]; then
