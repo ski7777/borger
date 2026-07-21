@@ -12,3 +12,8 @@ CMD ["/borger.sh"]
 FROM base-jq as volumes
 COPY volumes.sh /volumes.sh
 CMD ["/volumes.sh"]
+
+FROM base-jq as mailcow
+RUN apk add --no-cache --upgrade sed findutils bash git openssl curl gawk coreutils grep
+COPY mailcow.sh /mailcow.sh
+CMD ["/mailcow.sh"]
