@@ -33,6 +33,7 @@ function run_backup_job_volumes(){
 
 function run_backup_job_mailcow(){
     local compose_id=$1
+    echo "Backing-up mailcow: $compose_id"
     local container_mounts_borg_prefix=mailcow/$compose_id/mounts
     local mounts=$(
         cat <<'EOF' | base64 -w0
@@ -57,7 +58,7 @@ EOF
     )
     eval "$cmd"
     
-    echo "- database"
+    echo " - database"
     docker exec --env backup_db=$db $(docker container ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.service=mysql-mailcow") sh -c 'mariadb-dump -p"${MYSQL_ROOT_PASSWORD:-$MARIADB_ROOT_PASSWORD}" --single-transaction mailcow' | borg create ::$(echo mailcow/$compose_id/mariadb | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
 }
 
