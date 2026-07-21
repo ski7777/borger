@@ -52,7 +52,7 @@ for container_id in $container_ids; do
     for db in $pg_dbs; do
         echo " - Postgres database $db"
         echo $pg_dbs_borg_prefix/$db
-        docker exec -t $container_id pg_dump -c -U $pg_user $db | borg create ::$(echo $pg_dbs_borg_prefix/$db | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
+        #docker exec -t $container_id pg_dump -c -U $pg_user $db | borg create ::$(echo $pg_dbs_borg_prefix/$db | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
     done
 
     echo "---------------------------------------------"
