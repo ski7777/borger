@@ -101,7 +101,9 @@ for container_id in $container_ids; do
     echo "---------------------------------------------"
 done
 
-run_backup_job_mailcow mailcowdockerized
+for compose_id in $BORGER_MAILCOWS; do
+    run_backup_job_mailcow $compose_id
+done
 
 # show borg info unless BORGER_SUPPRESS_INFO has any value
 if [ -z "$BORGER_SUPPRESS_INFO" ]; then
