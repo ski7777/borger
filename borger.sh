@@ -66,6 +66,21 @@ EOF
     echo "---------------------------------------------"
 }
 
+function run_backup_job_zammad(){
+    local compose_id=$1
+    echo "Backing-up zammad: $compose_id"
+    local volume=$(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=zammad-backup")
+    local volume_destination=$(docker volume inspect -f '{{ .Mountpoint }}' $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=zammad-backup"))
+
+    echo " - database"
+    gunzip -c $(find $volume_destination -type f -iname "*_zammad_db.psql.gz"| sort | tail -n 1) | borg create ::$(echo zammad/$compose_id/postgres | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
+
+    echo " - files"
+    borg import-tar ::$(echo zammad/$compose_id/files | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) $(find $volume_destination -type f -iname "*_zammad_files.tar.gz"| sort | tail -n 1)
+    
+    echo "---------------------------------------------"
+}
+
 docker pull $(backup_job_image volumes)
 
 container_ids=$(docker ps -a --filter "label=$BORGER_LABEL_NAMESPACE.enable" --format "{{.ID}}")
@@ -103,6 +118,10 @@ done
 
 for compose_id in $BORGER_MAILCOWS; do
     run_backup_job_mailcow $compose_id
+done
+
+for compose_id in $BORGER_ZAMMMADS; do
+    run_backup_job_zammad $compose_id
 done
 
 # show borg info unless BORGER_SUPPRESS_INFO has any value
