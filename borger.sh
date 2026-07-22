@@ -1,3 +1,6 @@
+cat /var/borger/revision
+exit 0;
+
 # break lock if env var BORGER_BREAK_LOCK has any value
 if [ -n "$BORGER_BREAK_LOCK" ]; then
     borg break-lock
