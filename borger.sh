@@ -1,6 +1,3 @@
-cat /var/borger/revision
-exit 0;
-
 # break lock if env var BORGER_BREAK_LOCK has any value
 if [ -n "$BORGER_BREAK_LOCK" ]; then
     borg break-lock
@@ -16,9 +13,11 @@ function backup_job_cmd() {
         --rm
 }
 
+image_sha=$(cat cat /var/borger/revision)
+
 function backup_job_image(){
     local image_flavour=$1
-    echo "ghcr.io/ski7777/borger:latest-$image_flavour"
+    echo "ghcr.io/ski7777/borger:sha-$image_sha-$image_flavour"
 }
 
 function run_backup_job_volumes(){
@@ -66,6 +65,8 @@ EOF
 
     echo "---------------------------------------------"
 }
+
+docker pull $(backup_job_image volumes)
 
 container_ids=$(docker ps -a --filter "label=$BORGER_LABEL_NAMESPACE.enable" --format "{{.ID}}")
 for container_id in $container_ids; do
