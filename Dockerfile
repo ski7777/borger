@@ -1,5 +1,7 @@
 FROM docker:latest AS base
+ARG revision
 RUN apk add --no-cache borgbackup openssh-client
+RUN mkdir -p /var/borger && echo "$revision" > /var/borger/revision
 
 FROM base AS base-jq
 RUN apk add --no-cache jq
@@ -12,8 +14,3 @@ CMD ["/borger.sh"]
 FROM base-jq AS volumes
 COPY volumes.sh /volumes.sh
 CMD ["/volumes.sh"]
-
-FROM base-jq AS mailcow
-RUN apk add --no-cache --upgrade sed findutils bash git openssl curl gawk coreutils grep
-COPY mailcow.sh /mailcow.sh
-CMD ["/mailcow.sh"]
