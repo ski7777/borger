@@ -13,7 +13,7 @@ function backup_job_cmd() {
         --rm
 }
 
-image_sha=$(cat cat /var/borger/revision)
+image_sha=$(cat /var/borger/revision)
 
 function backup_job_image(){
     local image_flavour=$1
