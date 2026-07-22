@@ -70,13 +70,13 @@ function run_backup_job_zammad(){
     local compose_id=$1
     echo "Backing-up zammad: $compose_id"
     local volume=$(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=zammad-backup")
-    local volume_destination=$(docker volume inspect -f '{{ .Mountpoint }}' $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=zammad-backup"))
+    local volume_destination=/host$(docker volume inspect -f '{{ .Mountpoint }}' $(docker volume ls -q -f "label=com.docker.compose.project=$compose_id" -f "label=com.docker.compose.volume=zammad-backup"))
 
     echo " - database"
-    gunzip -c /host$(find $volume_destination -type f -iname "*_zammad_db.psql.gz"| sort | tail -n 1) | borg create ::$(echo zammad/$compose_id/postgres | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
+    gunzip -c $(find $volume_destination -type f -iname "*_zammad_db.psql.gz"| sort | tail -n 1) | borg create ::$(echo zammad/$compose_id/postgres | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) -
 
     echo " - files"
-    borg import-tar ::$(echo zammad/$compose_id/files | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) /host$(find $volume_destination -type f -iname "*_zammad_files.tar.gz"| sort | tail -n 1)
+    borg import-tar ::$(echo zammad/$compose_id/files | sed 's/:/::/g' | sed 's/\//:/g'):$(date -Iseconds) $(find $volume_destination -type f -iname "*_zammad_files.tar.gz"| sort | tail -n 1)
     
     echo "---------------------------------------------"
 }
